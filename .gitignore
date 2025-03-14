@@ -1,0 +1,7 @@
+.terraform/
+.terraform.*
+terraform.tfstate
+kuberenetes-keypair.pem
+marl_docker_secret
+
+
