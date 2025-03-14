@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: marl-deployment
+  labels:
+    app: marl-1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: marl-1
+  template:
+    metadata:
+      labels:
+        app: marl-1
+    spec:
+      containers:
+      - name: coffeshop
+        image: almabt/marl_project-1:v1 
+        ports:
+        - containerPort: 80
+      imagePullSecrets:
+        - name: dockerhubsecret
+  strategy:                
+    type: RollingUpdate    
+    rollingUpdate:
+      maxUnavailable: 1  
+      maxSurge: 1
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: marl-loadbalancer-service
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+    service.beta.kubernetes.io/aws-load-balancer-target-type: "instance"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-protocol: "TCP"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-port: "traffic-port"
+spec:
+  selector:
+    app: marl-1
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  
